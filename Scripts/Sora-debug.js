@@ -12,22 +12,21 @@ function ChangeCodcType(codecType) {
         videoCodecType: codecType
     };
 }
-function MakeCall() {
+function MakeCall(left,right) {
     MakeCallInit();
-    MakeCallLeft();
-    MakeCallRight();
+    MakeCallLeft(left);
+    MakeCallRight(right);
     MakeDataChannel('RotateValue');
 }
 function MakeDataChannel(id){
     let dataConnection = MakeCallfunc("data");
     let data = document.getElementById(id);
     dataConnection.on("push", (message, transportType) => {
-        if(data==null)return;
         data.innerText = message.data.Deg;
       });
 }
-function MakeCallLeft() {
-    recvonlyL = MakeCallfunc("left");
+function MakeCallLeft(left) {
+    recvonlyL = MakeCallfunc(left);
     recvonlyL.on("notify", (message, transportType) => {
         if (message.event_type == "connection.created" || message.event_type == "connection.updated" || message.event_type == "connection.destroyed") {
             channel_recvonly_connections = message.channel_recvonly_connections;
@@ -37,15 +36,6 @@ function MakeCallLeft() {
         let video = document.getElementById('LeftEye-video');
         if(video.srcObject==null){
             video.srcObject = event.streams[0];
-            var c = document.getElementById('unity-canvas');
-            c.addEventListener('mousedown', function (e) {
-                let videol = document.getElementById('LeftEye-video');
-                videol.play();
-            });
-            c.addEventListener('touchstart', function (e) {
-                let videol = document.getElementById('LeftEye-video');
-                videol.play();
-            });
         }
     });
     recvonlyL.on("removetrack", (event) => {
@@ -55,21 +45,12 @@ function MakeCallLeft() {
 }
     let rightStream;
     let leftStream;
-function MakeCallRight() {
-    recvonlyR = MakeCallfunc("right");
+function MakeCallRight(right) {
+    recvonlyR = MakeCallfunc(right);
     recvonlyR.on("track", (event) => {
         let video = document.getElementById('RightEye-video');
         if(video.srcObject==null){
             video.srcObject = event.streams[0];
-            var c = document.getElementById('unity-canvas');
-            c.addEventListener('mousedown', function (e) {
-                let videor = document.getElementById('RightEye-video');
-                videor.play();
-            });
-            c.addEventListener('touchstart', function (e) {
-                let videor = document.getElementById('RightEye-video');
-                videor.play();
-            });
         }
         
     });
@@ -81,11 +62,24 @@ function MakeCallRight() {
 }
 function MakeCallInit() {
     sora = Sora.connection('wss://sora.ikeilabsora.0am.jp/signaling', debug);
+    var c = document.getElementById('unity-canvas');
+    c.addEventListener('mousedown', function (e) {
+        let videor = document.getElementById('RightEye-video');
+        let videol = document.getElementById('LeftEye-video');
+        videor.play();
+        videol.play();
+    });
+    c.addEventListener('touchstart', function (e) {
+        let videor = document.getElementById('RightEye-video');
+        let videol = document.getElementById('LeftEye-video');
+        videor.play();
+        videol.play();
+    });
 
 }
 function MakeCallfunc(camerastr) {
     let recvonly;
-    recvonly = sora.recvonly(channelId + camerastr, null, options);
+    recvonly = sora.recvonly(camerastr, null, options);
     recvonly.connect();
     return recvonly;
 }
